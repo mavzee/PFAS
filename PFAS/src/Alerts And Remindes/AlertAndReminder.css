@@ -2,6 +2,8 @@
   flex: 0 0 360px;
   min-width: 0;
   margin-top: 12px;
+  display: flex;
+  flex-direction: column;
   background: linear-gradient(180deg, #062743 0%, #041f38 100%);
   border: 1px solid rgba(16, 71, 116, 0.85);
   box-shadow:
@@ -38,6 +40,7 @@
 .ar-list {
   display: flex;
   flex-direction: column;
+  flex: 1;
   margin: 0;
   padding: 0 14px 14px;
   list-style: none;

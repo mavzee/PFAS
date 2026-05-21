@@ -41,6 +41,7 @@ body {
   align-items: stretch;
   gap: 12px;
   width: 100%;
+  min-height: 430px;
 }
 
 .dashboard-top-row .test-kit-summary {
