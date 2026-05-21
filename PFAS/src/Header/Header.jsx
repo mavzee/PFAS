@@ -33,7 +33,14 @@ function Header() {
 
   return (
     <header className="dashboard-header">
-      <div className="header-brand">LawGroup</div>
+      <div className="header-brand">
+    <img
+      src="/logo.png"
+      alt="LawGroup Logo"
+      className="header-logo"
+    />
+    LawGroup
+  </div>
 
       <div className="header-title">
         <h1>PFAS TEST KIT OVERVIEW</h1>

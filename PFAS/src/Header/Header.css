@@ -10,11 +10,22 @@
 }
 
 .header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
   color: #ffffff;
   font-size: 30px;
   line-height: 1;
   font-weight: 800;
   letter-spacing: 0.2px;
+}
+
+.header-logo {
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .header-title {
@@ -66,6 +77,10 @@
     justify-items: center;
     gap: 12px;
     text-align: center;
+  }
+
+  .header-brand {
+    justify-content: center;
   }
 
   .header-time {
