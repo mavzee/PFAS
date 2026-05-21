@@ -27,7 +27,7 @@
 .live-map-canvas {
   position: relative;
   flex: 1;
-  min-height: 380px;
+  min-height: 0;
   margin: 0 12px 12px;
   overflow: hidden;
   background: #d7e2df;
@@ -48,9 +48,3 @@
   }
 }
 
-@media (max-width: 560px) {
-  .live-map-canvas {
-    height: 400px;
-  }
-
-}

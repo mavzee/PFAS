@@ -1,79 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
+import { findColumnIndex, parseCsvRows } from '../utils/csv.js'
+import { fetchSheetCsv, sheetCsvUrl } from '../utils/sheet.js'
 import './AlertAndReminder.css'
-
-const sheetCsvUrl = import.meta.env.VITE_GOOGLE_SHEET_CSV_URL
 
 const columnAliases = {
   alert: ['alert', 'reminder', 'notification', 'message', 'notes'],
   type: ['type', 'priority', 'severity', 'alert type'],
   time: ['time', 'date', 'updated', 'last updated'],
-}
-
-const fallbackAlerts = [
-  {
-    id: 'overdue',
-    type: 'warning',
-    message: '3 locations have test kits overdue for return.',
-    time: 'Now',
-  },
-  {
-    id: 'approval',
-    type: 'info',
-    message: 'Order pending approval for 2 locations.',
-    time: 'Today',
-  },
-  {
-    id: 'results',
-    type: 'reminder',
-    message: '5 test kits need results update.',
-    time: 'Today',
-  },
-]
-
-function parseCsvRows(csvText) {
-  const rows = []
-  let cell = ''
-  let row = []
-  let insideQuotes = false
-
-  for (let index = 0; index < csvText.length; index += 1) {
-    const char = csvText[index]
-    const nextChar = csvText[index + 1]
-
-    if (char === '"' && nextChar === '"') {
-      cell += '"'
-      index += 1
-    } else if (char === '"') {
-      insideQuotes = !insideQuotes
-    } else if (char === ',' && !insideQuotes) {
-      row.push(cell.trim())
-      cell = ''
-    } else if ((char === '\n' || char === '\r') && !insideQuotes) {
-      if (char === '\r' && nextChar === '\n') {
-        index += 1
-      }
-
-      row.push(cell.trim())
-      if (row.some(Boolean)) {
-        rows.push(row)
-      }
-      row = []
-      cell = ''
-    } else {
-      cell += char
-    }
-  }
-
-  row.push(cell.trim())
-  if (row.some(Boolean)) {
-    rows.push(row)
-  }
-
-  return rows
-}
-
-function findColumnIndex(headers, aliases) {
-  return headers.findIndex((header) => aliases.includes(header))
 }
 
 function normalizeType(value) {
@@ -86,6 +19,10 @@ function normalizeType(value) {
 }
 
 function mapAlerts(csvText) {
+  if (!csvText) {
+    return []
+  }
+
   const rows = parseCsvRows(csvText)
   const [headers = [], ...records] = rows
   const normalizedHeaders = headers.map((header) => header.toLowerCase().trim())
@@ -120,24 +57,19 @@ function AlertAndReminder() {
 
   useEffect(() => {
     if (!sheetCsvUrl) {
-      return
+      return undefined
     }
 
     const controller = new AbortController()
 
     async function fetchAlerts() {
       try {
-        const response = await fetch(sheetCsvUrl, { signal: controller.signal })
-
-        if (!response.ok) {
-          throw new Error(`Sheet request failed: ${response.status}`)
-        }
-
-        const csvText = await response.text()
+        const csvText = await fetchSheetCsv(controller.signal)
         setAlerts(mapAlerts(csvText))
         setSheetState('Google Sheet connected')
       } catch (error) {
         if (error.name !== 'AbortError') {
+          setAlerts([])
           setSheetState('Unable to load Google Sheet')
         }
       }
@@ -148,10 +80,7 @@ function AlertAndReminder() {
     return () => controller.abort()
   }, [])
 
-  const visibleAlerts = useMemo(
-    () => (alerts.length ? alerts : fallbackAlerts).slice(0, 5),
-    [alerts],
-  )
+  const visibleAlerts = useMemo(() => alerts.slice(0, 5), [alerts])
 
   return (
     <section className="alert-reminder" aria-labelledby="alert-reminder-title">
@@ -161,15 +90,21 @@ function AlertAndReminder() {
       </div>
 
       <ul className="ar-list">
-        {visibleAlerts.map((alert) => (
-          <li className={alert.type} key={alert.id}>
-            <span className="ar-icon" aria-hidden="true" />
-            <p>
-              {alert.message}
-              {alert.time && <time>{alert.time}</time>}
-            </p>
+        {visibleAlerts.length ? (
+          visibleAlerts.map((alert) => (
+            <li className={alert.type} key={alert.id}>
+              <span className="ar-icon" aria-hidden="true" />
+              <p>
+                {alert.message}
+                {alert.time && <time>{alert.time}</time>}
+              </p>
+            </li>
+          ))
+        ) : (
+          <li className="ar-empty">
+            <p>No alerts available</p>
           </li>
-        ))}
+        )}
       </ul>
     </section>
   )

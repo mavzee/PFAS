@@ -117,6 +117,17 @@
   font-size: 11px;
 }
 
+.ar-empty {
+  padding: 16px 0;
+}
+
+.ar-empty p {
+  margin: 0;
+  color: #8fa7bc;
+  font-size: 13px;
+  text-align: center;
+}
+
 @media (max-width: 1180px) {
   .alert-reminder {
     flex-basis: auto;

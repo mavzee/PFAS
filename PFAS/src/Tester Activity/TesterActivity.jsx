@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
+import { findColumnIndex, parseCsvRows } from '../utils/csv.js'
+import { fetchSheetCsv, sheetCsvUrl } from '../utils/sheet.js'
 import './TesterActivity.css'
-
-const sheetCsvUrl = import.meta.env.VITE_GOOGLE_SHEET_CSV_URL
 
 const columnAliases = {
   tester: ['tester', 'name', 'agent', 'tester name'],
@@ -10,53 +10,11 @@ const columnAliases = {
   lastActivity: ['last activity', 'last activity time', 'last_activity', 'updated', 'last updated'],
 }
 
-function parseCsvRows(csvText) {
-  const rows = []
-  let cell = ''
-  let row = []
-  let insideQuotes = false
-
-  for (let index = 0; index < csvText.length; index += 1) {
-    const char = csvText[index]
-    const nextChar = csvText[index + 1]
-
-    if (char === '"' && nextChar === '"') {
-      cell += '"'
-      index += 1
-    } else if (char === '"') {
-      insideQuotes = !insideQuotes
-    } else if (char === ',' && !insideQuotes) {
-      row.push(cell.trim())
-      cell = ''
-    } else if ((char === '\n' || char === '\r') && !insideQuotes) {
-      if (char === '\r' && nextChar === '\n') {
-        index += 1
-      }
-
-      row.push(cell.trim())
-      if (row.some(Boolean)) {
-        rows.push(row)
-      }
-      row = []
-      cell = ''
-    } else {
-      cell += char
-    }
-  }
-
-  row.push(cell.trim())
-  if (row.some(Boolean)) {
-    rows.push(row)
-  }
-
-  return rows
-}
-
-function findColumnIndex(headers, aliases) {
-  return headers.findIndex((header) => aliases.includes(header))
-}
-
 function mapSheetRows(csvText) {
+  if (!csvText) {
+    return []
+  }
+
   const rows = parseCsvRows(csvText)
   const [headers = [], ...records] = rows
   const normalizedHeaders = headers.map((header) => header.toLowerCase().trim())
@@ -74,12 +32,12 @@ function mapSheetRows(csvText) {
   return records
     .map((row, index) => ({
       id: `${row[indexes.tester] || 'tester'}-${index}`,
-      tester: row[indexes.tester] || 'Unassigned',
-      status: row[indexes.status] || 'Available',
-      location: row[indexes.location] || 'No location',
-      lastActivity: row[indexes.lastActivity] || '-',
+      tester: row[indexes.tester] || '',
+      status: row[indexes.status] || '',
+      location: row[indexes.location] || '',
+      lastActivity: row[indexes.lastActivity] || '',
     }))
-    .filter((record) => record.tester !== 'Unassigned' || record.location !== 'No location')
+    .filter((record) => record.tester || record.status || record.location || record.lastActivity)
 }
 
 function statusClassName(status) {
@@ -98,24 +56,19 @@ function TesterActivity() {
 
   useEffect(() => {
     if (!sheetCsvUrl) {
-      return
+      return undefined
     }
 
     const controller = new AbortController()
 
     async function fetchTesterActivity() {
       try {
-        const response = await fetch(sheetCsvUrl, { signal: controller.signal })
-
-        if (!response.ok) {
-          throw new Error(`Sheet request failed: ${response.status}`)
-        }
-
-        const csvText = await response.text()
+        const csvText = await fetchSheetCsv(controller.signal)
         setRows(mapSheetRows(csvText))
         setSheetState('Google Sheet connected')
       } catch (error) {
         if (error.name !== 'AbortError') {
+          setRows([])
           setSheetState('Unable to load Google Sheet')
         }
       }
@@ -149,17 +102,23 @@ function TesterActivity() {
             {visibleRows.length ? (
               visibleRows.map((row) => (
                 <tr key={row.id}>
-                  <td>{row.tester}</td>
+                  <td>{row.tester || '-'}</td>
                   <td>
-                    <span className={`ta-pill ${statusClassName(row.status)}`}>{row.status}</span>
+                    {row.status ? (
+                      <span className={`ta-pill ${statusClassName(row.status)}`}>{row.status}</span>
+                    ) : (
+                      '-'
+                    )}
                   </td>
-                  <td>{row.location}</td>
-                  <td>{row.lastActivity}</td>
+                  <td>{row.location || '-'}</td>
+                  <td>{row.lastActivity || '-'}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="4" className="ta-empty">No tester activity found</td>
+                <td colSpan="4" className="ta-empty">
+                  No tester activity found
+                </td>
               </tr>
             )}
           </tbody>

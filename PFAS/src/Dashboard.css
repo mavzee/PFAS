@@ -19,6 +19,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  width: 100%;
 }
 
 .dashboard-top-row {
@@ -34,6 +35,7 @@ body {
   align-items: stretch;
   gap: 12px;
   width: 100%;
+  margin-bottom: 12px;
 }
 
 .dashboard-lower-row {
@@ -41,7 +43,6 @@ body {
   align-items: stretch;
   gap: 12px;
   width: 100%;
-  min-height: 430px;
 }
 
 .dashboard-top-row .test-kit-summary {
@@ -54,9 +55,352 @@ body {
 }
 
 .dashboard-middle-row .test-kit-flow {
-  flex: 1 1 auto;
-  width: calc(100% - 532px);
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
   max-width: none;
+}
+
+/* Desktop: fit entire dashboard in viewport without page scroll */
+@media (min-width: 1181px) {
+  html:has(.dashboard-page),
+  body:has(.dashboard-page) {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  #root:has(.dashboard-page) {
+    height: 100svh;
+    max-height: 100svh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .dashboard-page {
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+    padding: clamp(6px, 0.85vh, 12px);
+    gap: clamp(6px, 0.7vh, 10px);
+  }
+
+  .dashboard-header {
+    flex: 0 0 auto;
+    width: 100%;
+    padding: clamp(2px, 0.45vh, 8px) 4px clamp(2px, 0.45vh, 8px);
+  }
+
+  .header-brand {
+    font-size: clamp(18px, 2.1vh, 26px);
+  }
+
+  .header-logo {
+    width: clamp(30px, 3.4vh, 40px);
+    height: clamp(30px, 3.4vh, 40px);
+  }
+
+  .header-title h1 {
+    font-size: clamp(18px, 2.6vh, 34px);
+    letter-spacing: clamp(0.8px, 0.12vw, 1.8px);
+  }
+
+  .header-title p {
+    margin-top: clamp(3px, 0.4vh, 6px);
+    font-size: clamp(9px, 1vh, 12px);
+    letter-spacing: clamp(1px, 0.18vw, 2.4px);
+  }
+
+  .header-time strong,
+  .header-time span {
+    font-size: clamp(11px, 1.1vh, 13px);
+  }
+
+  .header-time small {
+    margin-top: clamp(4px, 0.5vh, 6px);
+    font-size: clamp(10px, 0.95vh, 11px);
+  }
+
+  .header-logout {
+    padding: clamp(5px, 0.6vh, 8px) clamp(10px, 1vh, 14px);
+    font-size: clamp(9px, 0.95vh, 11px);
+  }
+
+  .dashboard-top-row,
+  .dashboard-middle-row,
+  .dashboard-lower-row {
+    flex: 1 1 0;
+    min-height: 0;
+    margin-bottom: 0;
+  }
+
+  .dashboard-lower-row {
+    flex-grow: 1.2;
+  }
+
+  .dashboard-top-row .test-kit-summary,
+  .dashboard-top-row .status-breakdown,
+  .dashboard-middle-row .test-kit-flow,
+  .dashboard-middle-row .tester-activity,
+  .dashboard-lower-row .live-map,
+  .dashboard-lower-row .recent-activity,
+  .dashboard-lower-row .alert-reminder {
+    height: 100%;
+    min-height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .dashboard-top-row .test-kit-summary {
+    flex: 1 1 0;
+    width: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dashboard-top-row .status-breakdown {
+    flex: 0 0 clamp(380px, 34vw, 540px);
+    width: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .test-kit-summary .tks-heading,
+  .status-breakdown .sb-heading,
+  .test-kit-flow h2,
+  .tester-activity .ta-heading,
+  .live-map h2,
+  .recent-activity .ra-heading,
+  .alert-reminder .ar-heading {
+    padding: clamp(6px, 0.75vh, 10px) clamp(8px, 0.9vw, 12px);
+  }
+
+  .test-kit-summary .tks-heading h2,
+  .status-breakdown .sb-heading h2,
+  .test-kit-flow h2,
+  .tester-activity .ta-heading h2,
+  .live-map h2,
+  .recent-activity .ra-heading h2,
+  .alert-reminder .ar-heading h2 {
+    font-size: clamp(11px, 1.15vh, 14px);
+  }
+
+  .tks-heading span,
+  .tks-heading small,
+  .sb-heading small,
+  .ta-heading small,
+  .ra-heading small,
+  .ar-heading small {
+    font-size: clamp(9px, 0.95vh, 11px);
+  }
+
+  .tks-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 0 clamp(8px, 0.9vw, 10px) clamp(6px, 0.75vh, 10px);
+    gap: clamp(5px, 0.6vh, 8px);
+    align-content: stretch;
+  }
+
+  .tks-card {
+    min-height: 0;
+    height: 100%;
+    justify-content: center;
+    padding: clamp(8px, 1vh, 14px) clamp(6px, 0.6vw, 10px);
+    gap: clamp(8px, 1vh, 14px);
+  }
+
+  .tks-label {
+    min-height: 0;
+    font-size: clamp(12px, 1.35vh, 16px);
+    line-height: 1.15;
+  }
+
+  .tks-label small {
+    font-size: clamp(10px, 1.05vh, 12px);
+  }
+
+  .tks-card strong {
+    font-size: clamp(28px, 5vh, 44px);
+  }
+
+  .sb-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    justify-content: center;
+    padding: clamp(10px, 1.2vh, 16px) clamp(12px, 1.6vw, 20px);
+    gap: clamp(14px, 1.8vh, 24px);
+    grid-template-columns: clamp(130px, 15vh, 175px) minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .sb-donut {
+    width: clamp(130px, 15vh, 175px);
+    height: clamp(130px, 15vh, 175px);
+  }
+
+  .sb-donut strong {
+    font-size: clamp(32px, 4.8vh, 44px);
+  }
+
+  .sb-donut span {
+    font-size: clamp(11px, 1.25vh, 14px);
+  }
+
+  .sb-legend {
+    gap: clamp(8px, 1vh, 12px);
+    max-height: 100%;
+    overflow-y: auto;
+  }
+
+  .sb-legend li {
+    font-size: clamp(12px, 1.35vh, 16px);
+    gap: clamp(8px, 0.85vh, 10px);
+  }
+
+  .sb-dot {
+    width: clamp(12px, 1.3vh, 16px);
+    height: clamp(12px, 1.3vh, 16px);
+  }
+
+  .sb-legend strong,
+  .sb-legend em {
+    font-size: clamp(12px, 1.3vh, 16px);
+  }
+
+  .dashboard-middle-row .test-kit-flow {
+    flex: 1 1 0;
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .tkf-steps {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    padding: clamp(8px, 1vh, 12px) clamp(14px, 1.6vw, 24px);
+    gap: clamp(8px, 1.1vw, 16px);
+    align-items: stretch;
+    overflow-x: hidden;
+  }
+
+  .tkf-step {
+    --tkf-icon-size: clamp(44px, 5.8vh, 60px);
+    gap: clamp(8px, 1vh, 12px);
+    padding: clamp(6px, 0.8vh, 10px) clamp(4px, 0.4vw, 6px);
+  }
+
+  .tkf-icon-track {
+    height: var(--tkf-icon-track);
+  }
+
+  .tkf-symbol {
+    width: clamp(20px, 2.6vh, 28px);
+    height: clamp(20px, 2.6vh, 28px);
+  }
+
+  .tkf-step h3 {
+    min-height: 0;
+    font-size: clamp(11px, 1.3vh, 15px);
+    line-height: 1.15;
+  }
+
+  .tkf-step h3 span {
+    font-size: clamp(10px, 1.1vh, 12px);
+  }
+
+  .tkf-step p {
+    max-width: clamp(96px, 10vw, 128px);
+    font-size: clamp(11px, 1.2vh, 13px);
+    line-height: 1.35;
+  }
+
+  .tkf-arrow {
+    width: clamp(22px, 2.6vw, 30px);
+  }
+
+  .dashboard-middle-row .tester-activity {
+    flex: 0 0 clamp(340px, 30vw, 500px);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .ta-table-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding-bottom: clamp(6px, 0.75vh, 10px);
+  }
+
+  .tester-activity th,
+  .tester-activity td {
+    padding: clamp(4px, 0.55vh, 7px);
+    font-size: clamp(10px, 1vh, 12px);
+  }
+
+  .tester-activity th {
+    font-size: clamp(9px, 0.9vh, 10px);
+  }
+
+  .ta-pill {
+    min-width: clamp(68px, 7vw, 84px);
+    min-height: clamp(16px, 1.8vh, 20px);
+    font-size: clamp(8px, 0.85vh, 10px);
+  }
+
+  .dashboard-lower-row .live-map {
+    flex: 1 1 0;
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .live-map-canvas {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 0 clamp(8px, 0.9vw, 12px) clamp(6px, 0.75vh, 10px);
+  }
+
+  .dashboard-lower-row .recent-activity {
+    flex: 0 0 clamp(280px, 24vw, 400px);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .dashboard-lower-row .alert-reminder {
+    flex: 0 0 clamp(250px, 21vw, 340px);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .ra-list,
+  .ar-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: clamp(6px, 0.75vh, 10px);
+  }
+
+  .ra-list li {
+    min-height: clamp(28px, 3.2vh, 34px);
+  }
+
+  .ra-list p,
+  .ra-list time,
+  .ar-list p,
+  .ar-list time {
+    font-size: clamp(10px, 1vh, 12px);
+  }
+
+  .ar-list li {
+    padding: clamp(8px, 0.9vh, 11px) 0;
+  }
 }
 
 @media (max-width: 1180px) {
@@ -72,5 +416,15 @@ body {
 
   .dashboard-middle-row .test-kit-flow {
     width: 100%;
+  }
+
+  .dashboard-lower-row .live-map,
+  .dashboard-lower-row .recent-activity,
+  .dashboard-lower-row .alert-reminder {
+    min-height: 320px;
+  }
+
+  .live-map-canvas {
+    min-height: 280px;
   }
 }

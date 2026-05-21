@@ -8,9 +8,11 @@ The dashboard currently reads one published CSV URL from:
 VITE_GOOGLE_SHEET_CSV_URL=
 ```
 
-Required useful columns:
+Required useful columns (either layout works):
 
-- `Status`: drives Test Kit Summary and Status Breakdown.
+**Checkbox columns** (matches your live sheet): one column per stage with headers `Retainer`, `Ordered`, `Eurofins`, `Outbound`, `Pure Green Testers`, `Inbound`, `Invoice`, `Test Results`. Checked boxes export as `TRUE` in CSV; Test Kit Summary counts each `TRUE` per column.
+
+**Single status column** (template CSV): `Status` text value per row drives Test Kit Summary and Status Breakdown.
 - `Tester`, `Current Location`, `Last Activity`: drives Tester Activity.
 - `Activity`, `Time`: drives Recent Activity.
 - `Alert`, `Type`: drives Alerts and Reminders.

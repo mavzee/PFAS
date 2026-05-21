@@ -1,68 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
+import { findColumnIndex, parseCsvRows } from '../utils/csv.js'
+import { fetchSheetCsv, sheetCsvUrl } from '../utils/sheet.js'
 import './RecentActivity.css'
-
-const sheetCsvUrl = import.meta.env.VITE_GOOGLE_SHEET_CSV_URL
 
 const columnAliases = {
   activity: ['activity', 'recent activity', 'event', 'description', 'notes', 'update'],
   status: ['status', 'stage', 'test kit status', 'flow'],
   location: ['location', 'current location', 'site', 'pws'],
   time: ['time', 'last activity', 'last activity time', 'updated', 'last updated', 'date'],
-}
-
-const fallbackActivities = [
-  {
-    id: 'fallback-results',
-    type: 'results',
-    text: 'Test results activity will appear here after sheet sync',
-    time: 'Pending sheet',
-  },
-]
-
-function parseCsvRows(csvText) {
-  const rows = []
-  let cell = ''
-  let row = []
-  let insideQuotes = false
-
-  for (let index = 0; index < csvText.length; index += 1) {
-    const char = csvText[index]
-    const nextChar = csvText[index + 1]
-
-    if (char === '"' && nextChar === '"') {
-      cell += '"'
-      index += 1
-    } else if (char === '"') {
-      insideQuotes = !insideQuotes
-    } else if (char === ',' && !insideQuotes) {
-      row.push(cell.trim())
-      cell = ''
-    } else if ((char === '\n' || char === '\r') && !insideQuotes) {
-      if (char === '\r' && nextChar === '\n') {
-        index += 1
-      }
-
-      row.push(cell.trim())
-      if (row.some(Boolean)) {
-        rows.push(row)
-      }
-      row = []
-      cell = ''
-    } else {
-      cell += char
-    }
-  }
-
-  row.push(cell.trim())
-  if (row.some(Boolean)) {
-    rows.push(row)
-  }
-
-  return rows
-}
-
-function findColumnIndex(headers, aliases) {
-  return headers.findIndex((header) => aliases.includes(header))
 }
 
 function activityType(value) {
@@ -77,6 +22,10 @@ function activityType(value) {
 }
 
 function mapActivities(csvText) {
+  if (!csvText) {
+    return []
+  }
+
   const rows = parseCsvRows(csvText)
   const [headers = [], ...records] = rows
   const normalizedHeaders = headers.map((header) => header.toLowerCase().trim())
@@ -98,7 +47,7 @@ function mapActivities(csvText) {
         id: `${text || 'activity'}-${index}`,
         type: activityType(`${activity} ${status}`),
         text,
-        time: row[indexes.time] || '-',
+        time: row[indexes.time] || '',
       }
     })
     .filter((record) => record.text)
@@ -110,24 +59,19 @@ function RecentActivity() {
 
   useEffect(() => {
     if (!sheetCsvUrl) {
-      return
+      return undefined
     }
 
     const controller = new AbortController()
 
     async function fetchRecentActivity() {
       try {
-        const response = await fetch(sheetCsvUrl, { signal: controller.signal })
-
-        if (!response.ok) {
-          throw new Error(`Sheet request failed: ${response.status}`)
-        }
-
-        const csvText = await response.text()
+        const csvText = await fetchSheetCsv(controller.signal)
         setActivities(mapActivities(csvText))
         setSheetState('Google Sheet connected')
       } catch (error) {
         if (error.name !== 'AbortError') {
+          setActivities([])
           setSheetState('Unable to load Google Sheet')
         }
       }
@@ -138,10 +82,7 @@ function RecentActivity() {
     return () => controller.abort()
   }, [])
 
-  const visibleActivities = useMemo(
-    () => (activities.length ? activities : fallbackActivities).slice(0, 7),
-    [activities],
-  )
+  const visibleActivities = useMemo(() => activities.slice(0, 7), [activities])
 
   return (
     <section className="recent-activity" aria-labelledby="recent-activity-title">
@@ -151,13 +92,19 @@ function RecentActivity() {
       </div>
 
       <ul className="ra-list">
-        {visibleActivities.map((activity) => (
-          <li key={activity.id}>
-            <span className={`ra-icon ${activity.type}`} aria-hidden="true" />
-            <p>{activity.text}</p>
-            <time>{activity.time}</time>
+        {visibleActivities.length ? (
+          visibleActivities.map((activity) => (
+            <li key={activity.id}>
+              <span className={`ra-icon ${activity.type}`} aria-hidden="true" />
+              <p>{activity.text}</p>
+              <time>{activity.time || '-'}</time>
+            </li>
+          ))
+        ) : (
+          <li className="ra-empty">
+            <p>No recent activity available</p>
           </li>
-        ))}
+        )}
       </ul>
     </section>
   )

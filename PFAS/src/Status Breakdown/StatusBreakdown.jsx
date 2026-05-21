@@ -1,48 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import { buildStatusBreakdownItems } from '../utils/status.js'
 import './StatusBreakdown.css'
-
-const statuses = [
-  {
-    key: 'Retainer',
-    label: 'Retainer',
-    color: '#0d72cf',
-  },
-  {
-    key: 'Ordered',
-    label: 'Ordered',
-    color: '#9b60d8',
-  },
-  {
-    key: 'Eurofins',
-    label: 'Eurofins',
-    color: '#1d8cff',
-  },
-  {
-    key: 'Outbound',
-    label: 'Outbound (In Transit)',
-    color: '#075db8',
-  },
-  {
-    key: 'Pure Green Testers',
-    label: 'Pure Green Testers',
-    color: '#76b82a',
-  },
-  {
-    key: 'Inbound',
-    label: 'Inbound (In Transit)',
-    color: '#f28b16',
-  },
-  {
-    key: 'Invoice',
-    label: 'Invoice',
-    color: '#6d7a82',
-  },
-  {
-    key: 'Test Results',
-    label: 'Test Results',
-    color: '#21a5b5',
-  },
-]
 
 function makeChartGradient(items, total) {
   if (!total) {
@@ -109,15 +67,7 @@ function StatusBreakdown() {
     }
   }, [])
 
-  const items = useMemo(
-    () =>
-      statuses.map((status) => ({
-        ...status,
-        count: counts[status.key] || 0,
-      })),
-    [counts],
-  )
-
+  const items = useMemo(() => buildStatusBreakdownItems(counts), [counts])
   const total = items.reduce((sum, item) => sum + item.count, 0)
   const chartGradient = makeChartGradient(items, total)
 

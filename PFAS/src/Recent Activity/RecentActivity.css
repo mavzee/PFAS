@@ -120,6 +120,18 @@
   text-align: right;
 }
 
+.ra-empty {
+  display: block;
+  padding: 16px 0;
+}
+
+.ra-empty p {
+  margin: 0;
+  color: #8fa7bc;
+  font-size: 13px;
+  text-align: center;
+}
+
 @media (max-width: 1180px) {
   .recent-activity {
     flex-basis: auto;
