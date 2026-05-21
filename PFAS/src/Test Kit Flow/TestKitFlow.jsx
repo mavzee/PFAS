@@ -47,14 +47,14 @@ const flowSteps = [
     icon: 'expenses',
     title: 'Invoice',
     subtitle: '',
-    description: 'Invoice from Eurofins will be sent to us via email.After the testing, test kits will be send back to eurofins from the utility.',
+    description: 'Invoice from Eurofins will be sent to us via email.',
     tone: 'blue',
   },
   {
     icon: 'flask',
     title: 'Test Results',
     subtitle: '',
-    description: 'Test results.',
+    description: ' ',
     tone: 'green',
   },
 ]

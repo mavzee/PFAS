@@ -48,7 +48,7 @@ const summaryRecords = [
   {
     title: 'Test Results',
     subtitle: '',
-    note: 'Test results.',
+    note: ' ',
     tone: 'green',
   },
 ]
