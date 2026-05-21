@@ -1,0 +1,9 @@
+Record ID,Status,Tester,Current Location,Last Activity,Activity,Time,Alert,Type,Notes
+PFAS-001,Retainer,Nate,City of Belville,10:15 AM,Retainer received for City of Belville,10:15 AM,,Info,Initial retainer logged
+PFAS-002,Ordered,Todd,Town of Central,10:12 AM,Test kits ordered for Town of Central,10:12 AM,,Info,Order created
+PFAS-003,Eurofins,Donald,Magnolia Plantation WS,10:08 AM,Eurofins preparing test kits for Magnolia Plantation WS,10:08 AM,,Info,Kits in preparation
+PFAS-004,Outbound,Other Agent 1,Buckatunna Water Works,10:05 AM,Test kits shipped from Eurofins to Buckatunna Water Works,10:05 AM,,Info,Outbound shipment
+PFAS-005,Pure Green Testers,Nate,City of Belville,10:24 AM,Sample collection started at City of Belville,10:24 AM,,Info,Tester in the field
+PFAS-006,Inbound,Other Agent 2,Returning to Lab,09:58 AM,Samples returning to Eurofins laboratory,09:58 AM,3 locations have test kits overdue for return.,Warning,Return follow up needed
+PFAS-007,Invoice,Admin,Eurofins Billing,09:45 AM,Invoice sent via email for completed kit batch,09:45 AM,Order pending approval for 2 locations.,Reminder,Approval pending
+PFAS-008,Test Results,Lab Team,Eurofins Lab,09:30 AM,Test results uploaded for review,09:30 AM,5 test kits need results update.,Reminder,Results follow up

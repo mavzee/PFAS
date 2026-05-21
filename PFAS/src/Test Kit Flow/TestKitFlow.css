@@ -1,0 +1,305 @@
+.test-kit-flow {
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: linear-gradient(180deg, #062743 0%, #041f38 100%);
+  border: 1px solid rgba(16, 71, 116, 0.85);
+  box-shadow:
+    inset 0 1px 0 rgba(78, 158, 219, 0.22),
+    0 8px 18px rgba(0, 0, 0, 0.22);
+  color: #ffffff;
+  font-family: var(--sf-pro);
+  overflow: hidden;
+}
+
+.test-kit-flow h2 {
+  margin: 0;
+  padding: 10px 12px;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.tkf-steps {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  align-items: stretch;
+  justify-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  gap: clamp(8px, 1.2vw, 16px);
+  padding: 12px clamp(12px, 1.5vw, 20px) 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.tkf-step {
+  --tkf-icon-size: clamp(48px, 5.5vh, 64px);
+  --tkf-icon-track: calc(var(--tkf-icon-size) + 12px);
+  display: grid;
+  grid-template-rows: var(--tkf-icon-track) auto minmax(0, 1fr);
+  justify-items: center;
+  align-content: start;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 8px 4px;
+  box-sizing: border-box;
+  color: var(--tkf-color);
+  text-align: center;
+}
+
+.tkf-icon-track {
+  position: relative;
+  width: 100%;
+  height: var(--tkf-icon-track);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tkf-purple {
+  --tkf-color: #9b60d8;
+}
+
+.tkf-blue {
+  --tkf-color: #0d72cf;
+}
+
+.tkf-green {
+  --tkf-color: #76b82a;
+}
+
+.tkf-icon {
+  width: var(--tkf-icon-size);
+  height: var(--tkf-icon-size);
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.2), transparent 34%),
+    var(--tkf-color);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
+}
+
+.tkf-step h3 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  margin: 0;
+  color: var(--tkf-color);
+  font-size: clamp(11px, 1.1vw, 14px);
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+
+.tkf-step h3 span {
+  display: block;
+  margin-top: 3px;
+  color: #36a1ff;
+  font-size: clamp(10px, 0.95vw, 12px);
+  line-height: 1.1;
+}
+
+.tkf-step p {
+  width: 100%;
+  max-width: clamp(100px, 11vw, 130px);
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(11px, 1.05vw, 13px);
+  line-height: 1.35;
+}
+
+.tkf-arrow {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  width: clamp(20px, 2.4vw, 28px);
+  height: 2px;
+  transform: translate(-50%, -50%);
+  background: #9fa8ad;
+  pointer-events: none;
+}
+
+.tkf-arrow::after {
+  content: "";
+  position: absolute;
+  top: -5px;
+  right: -1px;
+  border: 6px solid transparent;
+  border-left-color: #9fa8ad;
+}
+
+.tkf-symbol {
+  position: relative;
+  display: inline-block;
+  width: clamp(22px, 2.8vh, 30px);
+  height: clamp(22px, 2.8vh, 30px);
+  color: #ffffff;
+}
+
+.tkf-symbol::before,
+.tkf-symbol::after {
+  content: "";
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.tkf-symbol-clipboard::before {
+  inset: 4px 5px 1px;
+  border: 3px solid currentColor;
+  border-radius: 2px;
+}
+
+.tkf-symbol-clipboard::after {
+  left: 9px;
+  top: 0;
+  width: 9px;
+  height: 7px;
+  border: 2px solid currentColor;
+  border-radius: 2px;
+}
+
+.tkf-symbol-building::before {
+  inset: 4px 3px 1px;
+  border: 3px solid currentColor;
+}
+
+.tkf-symbol-building::after {
+  left: 8px;
+  top: 9px;
+  width: 4px;
+  height: 4px;
+  background: currentColor;
+  box-shadow: 7px 0 currentColor, 0 7px currentColor, 7px 7px currentColor;
+}
+
+.tkf-symbol-file-text::before {
+  inset: 2px 5px 1px;
+  border: 3px solid currentColor;
+  border-radius: 2px;
+}
+
+.tkf-symbol-file-text::after {
+  left: 10px;
+  top: 9px;
+  width: 10px;
+  height: 2px;
+  background: currentColor;
+  box-shadow: 0 5px currentColor, 0 10px currentColor;
+}
+
+.tkf-symbol-expenses::before {
+  left: 5px;
+  top: 3px;
+  width: 16px;
+  height: 20px;
+  border: 3px solid currentColor;
+  border-radius: 2px;
+}
+
+.tkf-symbol-expenses::after {
+  content: "$";
+  left: 0;
+  top: 1px;
+  width: 26px;
+  color: currentColor;
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.tkf-symbol-truck::before,
+.tkf-symbol-van::before {
+  left: 1px;
+  top: 8px;
+  width: 17px;
+  height: 10px;
+  border: 3px solid currentColor;
+}
+
+.tkf-symbol-truck::after,
+.tkf-symbol-van::after {
+  left: 4px;
+  bottom: 2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 14px 0 currentColor;
+}
+
+.tkf-symbol-truck {
+  border-right: 8px solid currentColor;
+  border-top: 7px solid transparent;
+  transform: translateY(1px);
+}
+
+.tkf-symbol-van {
+  border-left: 9px solid currentColor;
+  border-top: 6px solid transparent;
+  transform: translateY(1px);
+}
+
+.tkf-symbol-tester::before {
+  left: 9px;
+  top: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.tkf-symbol-tester::after {
+  left: 5px;
+  top: 12px;
+  width: 16px;
+  height: 12px;
+  border-radius: 10px 10px 2px 2px;
+  background: currentColor;
+}
+
+.tkf-symbol-flask::before {
+  left: 10px;
+  top: 2px;
+  width: 8px;
+  height: 12px;
+  border-left: 3px solid currentColor;
+  border-right: 3px solid currentColor;
+}
+
+.tkf-symbol-flask::after {
+  left: 4px;
+  bottom: 1px;
+  width: 19px;
+  height: 13px;
+  border: 3px solid currentColor;
+  border-radius: 2px 2px 10px 10px;
+}
+
+@media (max-width: 760px) {
+  .tkf-steps {
+    grid-template-columns: repeat(8, 112px);
+  }
+
+  .tkf-arrow {
+    display: block;
+  }
+}
+
+@media (max-width: 460px) {
+  .tkf-steps {
+    grid-template-columns: repeat(8, 112px);
+  }
+}

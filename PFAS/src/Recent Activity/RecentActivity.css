@@ -1,0 +1,140 @@
+.recent-activity {
+  flex: 0 0 420px;
+  min-width: 0;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #062743 0%, #041f38 100%);
+  border: 1px solid rgba(16, 71, 116, 0.85);
+  box-shadow:
+    inset 0 1px 0 rgba(78, 158, 219, 0.22),
+    0 8px 18px rgba(0, 0, 0, 0.22);
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.ra-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+}
+
+.ra-heading h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.ra-heading small {
+  color: #6f94b5;
+  font-size: 11px;
+  text-align: right;
+}
+
+.ra-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0;
+  margin: 0;
+  padding: 0 10px 12px;
+  list-style: none;
+}
+
+.ra-list li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 76px;
+  align-items: center;
+  gap: 9px;
+  min-height: 35px;
+  border-bottom: 1px solid rgba(84, 143, 186, 0.18);
+}
+
+.ra-icon {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  background: #0d72cf;
+}
+
+.ra-icon::before {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.ra-icon.shipping::before {
+  content: ">";
+}
+
+.ra-icon.order::before {
+  content: "#";
+}
+
+.ra-icon.results::before {
+  content: "✓";
+}
+
+.ra-icon.invoice::before {
+  content: "$";
+}
+
+.ra-icon.update::before {
+  content: "i";
+}
+
+.ra-icon.shipping {
+  background: #0d72cf;
+}
+
+.ra-icon.order {
+  background: #9b60d8;
+}
+
+.ra-icon.results {
+  background: #76b82a;
+}
+
+.ra-icon.invoice {
+  background: #6d7a82;
+}
+
+.ra-list p,
+.ra-list time {
+  margin: 0;
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.ra-list time {
+  color: #b8c9d9;
+  text-align: right;
+}
+
+.ra-empty {
+  display: block;
+  padding: 16px 0;
+}
+
+.ra-empty p {
+  margin: 0;
+  color: #8fa7bc;
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 1180px) {
+  .recent-activity {
+    flex-basis: auto;
+    width: 100%;
+  }
+}
