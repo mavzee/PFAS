@@ -1,0 +1,118 @@
+.test-kit-summary {
+  width: min(100%, 950px);
+  margin-bottom: 12px;
+  background: linear-gradient(180deg, #062743 0%, #041f38 100%);
+  border: 1px solid rgba(16, 71, 116, 0.85);
+  box-shadow:
+    inset 0 1px 0 rgba(78, 158, 219, 0.22),
+    0 8px 18px rgba(0, 0, 0, 0.22);
+  color: #ffffff;
+  font-family: var(--sf-pro);
+  overflow: hidden;
+}
+
+.tks-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+}
+
+.tks-heading h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.tks-heading span {
+  display: block;
+  color: #b6cce0;
+  font-size: 12px;
+  text-transform: uppercase;
+  text-align: right;
+}
+
+.tks-heading small {
+  display: block;
+  margin-top: 2px;
+  color: #6f94b5;
+  font-size: 11px;
+  text-align: right;
+}
+
+.tks-grid {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 10px 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.tks-card {
+  min-height: 116px;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 8px;
+  box-sizing: border-box;
+  color: var(--tks-color);
+  text-align: center;
+  background: rgba(5, 25, 45, 0.72);
+  border: 1px solid rgba(84, 143, 186, 0.18);
+}
+
+.tks-blue {
+  --tks-color: #0d72cf;
+}
+
+.tks-purple {
+  --tks-color: #9b60d8;
+}
+
+.tks-green {
+  --tks-color: #76b82a;
+}
+
+.tks-label {
+  min-height: 30px;
+  color: var(--tks-color);
+  font-size: 12px;
+  line-height: 1.05;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.tks-label small {
+  display: block;
+  margin-top: 2px;
+  color: #36a1ff;
+  font-size: 10px;
+}
+
+.tks-card strong {
+  color: #ffffff;
+  font-size: 34px;
+  line-height: 0.9;
+  font-weight: 800;
+}
+
+.tks-card p {
+  margin: 0;
+  color: #ffffff;
+  font-size: 11px;
+  line-height: 1.22;
+}
+
+@media (max-width: 760px) {
+  .tks-grid {
+    grid-template-columns: repeat(8, 112px);
+  }
+}
