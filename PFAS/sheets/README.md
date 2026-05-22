@@ -19,4 +19,8 @@ Required useful columns (either layout works):
 
 After importing to Google Sheets, publish the sheet as CSV and paste the CSV URL into `.env`.
 
-The dashboard polls the published CSV every 5 seconds by default (override with `VITE_GOOGLE_SHEET_POLL_MS`). Each request bypasses browser cache so changes show as soon as Google’s published CSV updates.
+The dashboard polls every second by default (`VITE_GOOGLE_SHEET_POLL_MS`, default `1000`).
+
+**Fastest (recommended):** set `VITE_GOOGLE_SHEET_ID` and `VITE_GOOGLE_SHEETS_API_KEY` so the app reads the sheet via the Google Sheets API (live data, no publish delay). Enable the Sheets API in Google Cloud Console, create an API key, and share the spreadsheet as “Anyone with the link can view”.
+
+**Without an API key:** use `VITE_GOOGLE_SHEET_CSV_URL` (published CSV). Do not rely on sheet ID alone from the browser — private sheets redirect to login and cause CORS errors.
