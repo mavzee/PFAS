@@ -6,7 +6,6 @@ export const sheetGid = import.meta.env.VITE_GOOGLE_SHEET_GID || '0'
 export const testerTabName = import.meta.env.VITE_GOOGLE_SHEET_TESTER_TAB || 'Tester Activity'
 export const testerSheetGid = import.meta.env.VITE_GOOGLE_SHEET_TESTER_GID || ''
 export const testerSheetCsvUrl = import.meta.env.VITE_GOOGLE_SHEET_TESTER_CSV_URL || ''
-
 let resolvedMainSheetTitle = null
 
 export function hasSheetConnection() {

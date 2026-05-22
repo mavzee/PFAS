@@ -2,9 +2,8 @@ import { useEffect } from 'react'
 import Header from './Header/Header.jsx'
 import TestKitSummary from './Test Kit Summary/TestKitSummary.jsx'
 import StatusBreakdown from './Status Breakdown/StatusBreakdown.jsx'
-import TestKitFlow from './Test Kit Flow/TestKitFlow.jsx'
+import FedExTracker from './Tracker/Tracker.jsx'
 import TesterActivity from './Tester Activity/TesterActivity.jsx'
-import LiveMap from './Live Map/LiveMap.jsx'
 import RecentActivity from './Recent Activity/RecentActivity.jsx'
 import AlertAndReminder from './Alerts And Remindes/AlertAndReminder.jsx'
 import { startSheetSync } from './utils/sheetCache.js'
@@ -20,14 +19,15 @@ function Dashboard() {
         <TestKitSummary />
         <StatusBreakdown />
       </div>
-      <div className="dashboard-middle-row">
-        <TestKitFlow />
-        <TesterActivity />
-      </div>
-      <div className="dashboard-lower-row">
-        <LiveMap />
-        <RecentActivity />
-        <AlertAndReminder />
+      <div className="dashboard-body-row">
+        <FedExTracker />
+        <div className="dashboard-right-column">
+          <TesterActivity />
+          <div className="dashboard-bottom-right-row">
+            <RecentActivity />
+            <AlertAndReminder />
+          </div>
+        </div>
       </div>
     </main>
   )

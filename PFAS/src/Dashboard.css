@@ -30,19 +30,30 @@ body {
   margin-bottom: 12px;
 }
 
-.dashboard-middle-row {
+.dashboard-body-row {
   display: flex;
   align-items: stretch;
   gap: 12px;
   width: 100%;
-  margin-bottom: 12px;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
-.dashboard-lower-row {
+.dashboard-right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 0 0 clamp(520px, 42vw, 720px);
+  min-width: 0;
+  min-height: 0;
+}
+
+.dashboard-bottom-right-row {
   display: flex;
   align-items: stretch;
   gap: 12px;
-  width: 100%;
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 .dashboard-top-row .test-kit-summary {
@@ -54,11 +65,26 @@ body {
   flex: 0 0 520px;
 }
 
-.dashboard-middle-row .test-kit-flow {
+.dashboard-body-row .tracker {
   flex: 1 1 0;
-  width: auto;
   min-width: 0;
-  max-width: none;
+  min-height: 0;
+}
+
+.dashboard-right-column .tester-activity {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.dashboard-bottom-right-row .recent-activity {
+  flex: 1 1 clamp(280px, 24vw, 400px);
+  min-width: 0;
+  min-height: 0;
+}
+
+.dashboard-bottom-right-row .alert-reminder {
+  flex: 0 0 clamp(250px, 21vw, 340px);
+  min-height: 0;
 }
 
 /* Desktop: fit entire dashboard in viewport without page scroll */
@@ -127,24 +153,22 @@ body {
   }
 
   .dashboard-top-row,
-  .dashboard-middle-row,
-  .dashboard-lower-row {
+  .dashboard-body-row {
     flex: 1 1 0;
     min-height: 0;
     margin-bottom: 0;
   }
 
-  .dashboard-lower-row {
-    flex-grow: 1.2;
+  .dashboard-body-row {
+    flex-grow: 1.35;
   }
 
   .dashboard-top-row .test-kit-summary,
   .dashboard-top-row .status-breakdown,
-  .dashboard-middle-row .test-kit-flow,
-  .dashboard-middle-row .tester-activity,
-  .dashboard-lower-row .live-map,
-  .dashboard-lower-row .recent-activity,
-  .dashboard-lower-row .alert-reminder {
+  .dashboard-body-row .tracker,
+  .dashboard-right-column .tester-activity,
+  .dashboard-bottom-right-row .recent-activity,
+  .dashboard-bottom-right-row .alert-reminder {
     height: 100%;
     min-height: 0;
     margin-top: 0;
@@ -167,9 +191,8 @@ body {
 
   .test-kit-summary .tks-heading,
   .status-breakdown .sb-heading,
-  .test-kit-flow h2,
+  .tracker-heading,
   .tester-activity .ta-heading,
-  .live-map h2,
   .recent-activity .ra-heading,
   .alert-reminder .ar-heading {
     padding: clamp(6px, 0.75vh, 10px) clamp(8px, 0.9vw, 12px);
@@ -177,9 +200,9 @@ body {
 
   .test-kit-summary .tks-heading h2,
   .status-breakdown .sb-heading h2,
-  .test-kit-flow h2,
+  .tracker-heading,
+  .tracker-heading h2,
   .tester-activity .ta-heading h2,
-  .live-map h2,
   .recent-activity .ra-heading h2,
   .alert-reminder .ar-heading h2 {
     font-size: clamp(11px, 1.15vh, 14px);
@@ -268,7 +291,7 @@ body {
     font-size: clamp(12px, 1.3vh, 16px);
   }
 
-  .dashboard-middle-row .test-kit-flow {
+  .dashboard-body-row .tracker {
     flex: 1 1 0;
     width: auto;
     display: flex;
@@ -276,53 +299,25 @@ body {
     min-height: 0;
   }
 
-  .tkf-steps {
+  .tracker-body {
     flex: 1 1 auto;
     min-height: 0;
-    width: 100%;
-    padding: clamp(8px, 1vh, 12px) clamp(14px, 1.6vw, 24px);
-    gap: clamp(8px, 1.1vw, 16px);
-    align-items: stretch;
-    overflow-x: hidden;
+    margin: 0 clamp(8px, 0.9vw, 12px) clamp(6px, 0.75vh, 10px);
   }
 
-  .tkf-step {
-    --tkf-icon-size: clamp(44px, 5.8vh, 60px);
-    gap: clamp(8px, 1vh, 12px);
-    padding: clamp(6px, 0.8vh, 10px) clamp(4px, 0.4vw, 6px);
+  .tracker-empty {
+    font-size: clamp(11px, 1.1vh, 13px);
   }
 
-  .tkf-icon-track {
-    height: var(--tkf-icon-track);
-  }
-
-  .tkf-symbol {
-    width: clamp(20px, 2.6vh, 28px);
-    height: clamp(20px, 2.6vh, 28px);
-  }
-
-  .tkf-step h3 {
+  .dashboard-right-column {
+    flex: 0 0 clamp(520px, 42vw, 720px);
+    display: flex;
+    flex-direction: column;
     min-height: 0;
-    font-size: clamp(11px, 1.3vh, 15px);
-    line-height: 1.15;
   }
 
-  .tkf-step h3 span {
-    font-size: clamp(10px, 1.1vh, 12px);
-  }
-
-  .tkf-step p {
-    max-width: clamp(96px, 10vw, 128px);
-    font-size: clamp(11px, 1.2vh, 13px);
-    line-height: 1.35;
-  }
-
-  .tkf-arrow {
-    width: clamp(22px, 2.6vw, 30px);
-  }
-
-  .dashboard-middle-row .tester-activity {
-    flex: 0 0 clamp(340px, 30vw, 500px);
+  .dashboard-right-column .tester-activity {
+    flex: 1 1 0;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -351,28 +346,20 @@ body {
     font-size: clamp(8px, 0.85vh, 10px);
   }
 
-  .dashboard-lower-row .live-map {
+  .dashboard-bottom-right-row {
     flex: 1 1 0;
-    width: auto;
+    min-height: 0;
+  }
+
+  .dashboard-bottom-right-row .recent-activity {
+    flex: 1 1 0;
     display: flex;
     flex-direction: column;
     min-height: 0;
+    min-width: 0;
   }
 
-  .live-map-canvas {
-    flex: 1 1 auto;
-    min-height: 0;
-    margin: 0 clamp(8px, 0.9vw, 12px) clamp(6px, 0.75vh, 10px);
-  }
-
-  .dashboard-lower-row .recent-activity {
-    flex: 0 0 clamp(280px, 24vw, 400px);
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-
-  .dashboard-lower-row .alert-reminder {
+  .dashboard-bottom-right-row .alert-reminder {
     flex: 0 0 clamp(250px, 21vw, 340px);
     display: flex;
     flex-direction: column;
@@ -405,26 +392,29 @@ body {
 
 @media (max-width: 1180px) {
   .dashboard-top-row,
-  .dashboard-middle-row,
-  .dashboard-lower-row {
+  .dashboard-body-row,
+  .dashboard-right-column,
+  .dashboard-bottom-right-row {
     flex-direction: column;
+  }
+
+  .dashboard-right-column {
+    flex-basis: auto;
+    width: 100%;
   }
 
   .dashboard-top-row .status-breakdown {
     flex-basis: auto;
   }
 
-  .dashboard-middle-row .test-kit-flow {
-    width: 100%;
-  }
-
-  .dashboard-lower-row .live-map,
-  .dashboard-lower-row .recent-activity,
-  .dashboard-lower-row .alert-reminder {
+  .dashboard-body-row .tracker,
+  .dashboard-right-column .tester-activity,
+  .dashboard-bottom-right-row .recent-activity,
+  .dashboard-bottom-right-row .alert-reminder {
     min-height: 320px;
   }
 
-  .live-map-canvas {
+  .tracker-body {
     min-height: 280px;
   }
 }
