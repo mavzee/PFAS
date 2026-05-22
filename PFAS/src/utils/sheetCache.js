@@ -7,9 +7,24 @@ import {
 } from './sheet.js'
 import { isValidTesterActivityCsv } from './testerActivity.js'
 import { countStatusesFromCsv } from './status.js'
+import {
+  ACTIVITY_FEED_LIMIT,
+  buildRowSnapshots,
+  diffRowSnapshots,
+  mapManualActivities,
+  mergeActivities,
+  prependActivityFeed,
+} from './recentActivity.js'
+import {
+  isFirestorePermissionsDenied,
+  isRecentActivityStoreEnabled,
+  loadRecentActivityFeed,
+  saveRecentActivityFeed,
+} from './recentActivityStore.js'
 
 const DEFAULT_POLL_MS = 1_000
 const PUBLISHED_CSV_POLL_MS = 5_000
+const UPLOAD_DEBOUNCE_MS = 1_500
 
 let state = {
   csvText: '',
@@ -26,6 +41,15 @@ let state = {
   isRefreshing: false,
   source: '',
 }
+
+let rowSnapshots = new Map()
+let activityFeed = []
+let hasBaseline = false
+let recentActivitiesLoading = false
+let isHydrating = false
+let uploadTimer = null
+let lastUploadedFeedKey = ''
+let hydrateAttempted = false
 
 const subscribers = new Set()
 let pollTimer = null
@@ -58,9 +82,85 @@ function isValidMainSheetCsv(csvText) {
   return normalizedHeaders.includes('retainer') && rows.length > 1
 }
 
+function getMergedRecentActivities() {
+  return mergeActivities(activityFeed, mapManualActivities(state.csvText))
+}
+
+function feedUploadKey(feed) {
+  return feed.map((item) => item.id).join('|')
+}
+
+function scheduleRecentActivityUpload(feed) {
+  if (!isRecentActivityStoreEnabled() || !feed.length || isFirestorePermissionsDenied()) {
+    return
+  }
+
+  const key = feedUploadKey(feed)
+
+  if (key === lastUploadedFeedKey) {
+    return
+  }
+
+  window.clearTimeout(uploadTimer)
+  uploadTimer = window.setTimeout(() => {
+    uploadTimer = null
+
+    saveRecentActivityFeed(feed).then(() => {
+      lastUploadedFeedKey = feedUploadKey(feed)
+    })
+  }, UPLOAD_DEBOUNCE_MS)
+}
+
+async function hydrateRecentActivityIfEmpty() {
+  if (
+    getMergedRecentActivities().length > 0 ||
+    isHydrating ||
+    hydrateAttempted ||
+    isFirestorePermissionsDenied()
+  ) {
+    return
+  }
+
+  if (!isRecentActivityStoreEnabled()) {
+    return
+  }
+
+  hydrateAttempted = true
+  isHydrating = true
+  recentActivitiesLoading = true
+  notifySubscribers()
+
+  try {
+    const remote = await loadRecentActivityFeed()
+
+    if (remote.length && getMergedRecentActivities().length === 0) {
+      activityFeed = remote
+      lastUploadedFeedKey = feedUploadKey(activityFeed)
+      notifySubscribers()
+    }
+  } finally {
+    isHydrating = false
+    recentActivitiesLoading = false
+    notifySubscribers()
+  }
+}
+
 function applyMainCsv(main) {
   const parsed = parseCsvRows(main)
   const [headers = [], ...rows] = parsed
+  const nextSnapshots = buildRowSnapshots(headers, rows)
+
+  if (hasBaseline) {
+    const newEvents = diffRowSnapshots(rowSnapshots, nextSnapshots)
+
+    if (newEvents.length) {
+      activityFeed = prependActivityFeed(activityFeed, newEvents, ACTIVITY_FEED_LIMIT)
+      scheduleRecentActivityUpload(activityFeed)
+    }
+  }
+
+  rowSnapshots = nextSnapshots
+  hasBaseline = true
 
   state.csvText = main
   state.hash = hashCsv(main)
@@ -70,6 +170,10 @@ function applyMainCsv(main) {
   state.lastUpdated = new Date()
   state.status = 'connected'
   state.source = getSheetSourceLabel()
+
+  if (getMergedRecentActivities().length === 0) {
+    hydrateRecentActivityIfEmpty()
+  }
 }
 
 function applyTesterCsv(tester) {
@@ -110,6 +214,9 @@ function buildSnapshot() {
     hasData: Boolean(state.csvText),
     hasTesterData: Boolean(state.testerCsvText),
     source: state.source,
+    recentActivities: getMergedRecentActivities(),
+    recentActivitiesLoading,
+    recentActivityFirestoreBlocked: isFirestorePermissionsDenied(),
   }
 }
 
@@ -234,6 +341,7 @@ export function startSheetSync() {
     // Ignore.
   }
 
+  hydrateRecentActivityIfEmpty()
   refreshSheet()
 
   const pollMs = Number.parseInt(import.meta.env.VITE_GOOGLE_SHEET_POLL_MS, 10) || getDefaultPollMs()
@@ -256,6 +364,8 @@ export function startSheetSync() {
     syncStarted = false
     window.clearInterval(pollTimer)
     pollTimer = null
+    window.clearTimeout(uploadTimer)
+    uploadTimer = null
     fetchGeneration += 1
     inflightFetch = null
     document.removeEventListener('visibilitychange', handleVisibilityChange)

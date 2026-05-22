@@ -1,62 +1,11 @@
 import { useMemo } from 'react'
-import { findColumnIndex, parseCsvRows } from '../utils/csv.js'
 import { useSheetData } from '../utils/useSheetData.js'
 import './RecentActivity.css'
 
-const columnAliases = {
-  activity: ['activity', 'recent activity', 'event', 'description', 'notes', 'update'],
-  status: ['status', 'stage', 'test kit status', 'flow'],
-  location: ['location', 'current location', 'site', 'pws'],
-  time: ['time', 'last activity', 'last activity time', 'updated', 'last updated', 'date'],
-}
-
-function activityType(value) {
-  const text = value.toLowerCase()
-
-  if (text.includes('ship') || text.includes('outbound') || text.includes('inbound')) return 'shipping'
-  if (text.includes('order')) return 'order'
-  if (text.includes('result') || text.includes('report')) return 'results'
-  if (text.includes('invoice') || text.includes('payment')) return 'invoice'
-
-  return 'update'
-}
-
-function mapActivities(csvText) {
-  if (!csvText) {
-    return []
-  }
-
-  const rows = parseCsvRows(csvText)
-  const [headers = [], ...records] = rows
-  const normalizedHeaders = headers.map((header) => header.toLowerCase().trim())
-  const indexes = {
-    activity: findColumnIndex(normalizedHeaders, columnAliases.activity),
-    status: findColumnIndex(normalizedHeaders, columnAliases.status),
-    location: findColumnIndex(normalizedHeaders, columnAliases.location),
-    time: findColumnIndex(normalizedHeaders, columnAliases.time),
-  }
-
-  return records
-    .map((row, index) => {
-      const activity = row[indexes.activity] || ''
-      const status = row[indexes.status] || ''
-      const location = row[indexes.location] || ''
-      const text = activity || [status, location].filter(Boolean).join(' update for ')
-
-      return {
-        id: `${text || 'activity'}-${index}`,
-        type: activityType(`${activity} ${status}`),
-        text,
-        time: row[indexes.time] || '',
-      }
-    })
-    .filter((record) => record.text)
-}
-
 function RecentActivity() {
-  const { csvText, sheetState } = useSheetData()
-  const activities = useMemo(() => mapActivities(csvText), [csvText])
-  const visibleActivities = useMemo(() => activities.slice(0, 7), [activities])
+  const { recentActivities, recentActivitiesLoading, recentActivityFirestoreBlocked, sheetState } =
+    useSheetData()
+  const visibleActivities = useMemo(() => recentActivities.slice(0, 7), [recentActivities])
 
   return (
     <section className="recent-activity" aria-labelledby="recent-activity-title">
@@ -76,7 +25,13 @@ function RecentActivity() {
           ))
         ) : (
           <li className="ra-empty">
-            <p>No recent activity available</p>
+            <p>
+              {recentActivitiesLoading
+                ? 'Loading history…'
+                : recentActivityFirestoreBlocked
+                  ? 'Firestore access blocked — publish rules in Firebase Console (see sheets/README.md and firestore.rules).'
+                  : 'No recent activity yet — updates appear when checkboxes change in the Test Kit Summary sheet'}
+            </p>
           </li>
         )}
       </ul>

@@ -95,6 +95,39 @@ export function isCheckedValue(value) {
   return normalized === 'true' || normalized === 'yes' || normalized === '1' || normalized === 'x'
 }
 
+/** Eurofins column uses text states (Stand By, Preparing) instead of a checkbox. */
+export function parseEurofinsCell(value) {
+  const normalized = String(value ?? '').trim()
+
+  if (!normalized) {
+    return ''
+  }
+
+  const lower = normalized.toLowerCase()
+
+  if (lower === 'false' || lower === '0' || lower === 'no') {
+    return ''
+  }
+
+  if (isCheckedValue(value)) {
+    return 'Preparing'
+  }
+
+  if (lower.includes('stand')) {
+    return 'Stand By'
+  }
+
+  if (lower.includes('prep')) {
+    return 'Preparing'
+  }
+
+  return normalized
+}
+
+export function isEurofinsActive(value) {
+  return Boolean(parseEurofinsCell(value))
+}
+
 export function mapHeaderToStatus(header) {
   const normalized = header.toLowerCase().trim()
 
@@ -121,7 +154,13 @@ export function countStatusesFromColumns(records, headers) {
 
   for (const row of records) {
     for (const [status, index] of Object.entries(columnIndices)) {
-      if (isCheckedValue(row[index])) {
+      const cell = row[index]
+
+      if (status === 'Eurofins') {
+        if (isEurofinsActive(cell)) {
+          counts[status] += 1
+        }
+      } else if (isCheckedValue(cell)) {
         counts[status] += 1
       }
     }
@@ -142,6 +181,8 @@ export function normalizeStatus(value) {
   if (status.includes('inbound') || status.includes('returning')) return 'Inbound'
   if (status.includes('invoice') || status.includes('payment')) return 'Invoice'
   if (status.includes('result') || status.includes('report')) return 'Test Results'
+  if (status.includes('stand by') || status.includes('standby')) return 'Eurofins'
+  if (status.includes('prepar')) return 'Eurofins'
   if (status.includes('eurofins')) return 'Eurofins'
 
   return ''
