@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { buildStatusBreakdownItems } from '../utils/status.js'
+import { useSheetData } from '../utils/useSheetData.js'
 import './StatusBreakdown.css'
 
 function makeChartGradient(items, total) {
@@ -18,55 +19,8 @@ function makeChartGradient(items, total) {
   return `conic-gradient(${segments.join(', ')})`
 }
 
-function readSummaryCounts() {
-  const summaryCards = document.querySelectorAll('.test-kit-summary .tks-card')
-
-  return Array.from(summaryCards).reduce((nextCounts, card) => {
-    const label = card.querySelector('.tks-label')
-    const title = label?.childNodes[0]?.textContent?.trim()
-    const count = Number.parseInt(card.querySelector('strong')?.textContent || '0', 10)
-
-    if (title) {
-      nextCounts[title] = Number.isNaN(count) ? 0 : count
-    }
-
-    return nextCounts
-  }, {})
-}
-
 function StatusBreakdown() {
-  const [counts, setCounts] = useState({})
-  const [sheetState, setSheetState] = useState('Syncing with Test Kit Summary')
-
-  useEffect(() => {
-    function syncFromSummary() {
-      const nextCounts = readSummaryCounts()
-      setCounts(nextCounts)
-      setSheetState(
-        Object.keys(nextCounts).length ? 'Synced with Test Kit Summary' : 'Waiting for Test Kit Summary',
-      )
-    }
-
-    syncFromSummary()
-
-    const summary = document.querySelector('.test-kit-summary')
-    if (!summary) {
-      const timeoutId = window.setTimeout(syncFromSummary, 0)
-      return () => window.clearTimeout(timeoutId)
-    }
-
-    const observer = new MutationObserver(syncFromSummary)
-    observer.observe(summary, {
-      childList: true,
-      characterData: true,
-      subtree: true,
-    })
-
-    return () => {
-      observer.disconnect()
-    }
-  }, [])
-
+  const { counts, sheetState } = useSheetData()
   const items = useMemo(() => buildStatusBreakdownItems(counts), [counts])
   const total = items.reduce((sum, item) => sum + item.count, 0)
   const chartGradient = makeChartGradient(items, total)

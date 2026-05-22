@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { findColumnIndex, parseCsvRows } from '../utils/csv.js'
-import { fetchSheetCsv, sheetCsvUrl } from '../utils/sheet.js'
+import { useSheetData } from '../utils/useSheetData.js'
 import './RecentActivity.css'
 
 const columnAliases = {
@@ -54,34 +54,8 @@ function mapActivities(csvText) {
 }
 
 function RecentActivity() {
-  const [activities, setActivities] = useState([])
-  const [sheetState, setSheetState] = useState(sheetCsvUrl ? 'Loading sheet...' : 'No sheet connected yet')
-
-  useEffect(() => {
-    if (!sheetCsvUrl) {
-      return undefined
-    }
-
-    const controller = new AbortController()
-
-    async function fetchRecentActivity() {
-      try {
-        const csvText = await fetchSheetCsv(controller.signal)
-        setActivities(mapActivities(csvText))
-        setSheetState('Google Sheet connected')
-      } catch (error) {
-        if (error.name !== 'AbortError') {
-          setActivities([])
-          setSheetState('Unable to load Google Sheet')
-        }
-      }
-    }
-
-    fetchRecentActivity()
-
-    return () => controller.abort()
-  }, [])
-
+  const { csvText, sheetState } = useSheetData()
+  const activities = useMemo(() => mapActivities(csvText), [csvText])
   const visibleActivities = useMemo(() => activities.slice(0, 7), [activities])
 
   return (

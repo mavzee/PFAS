@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { findColumnIndex, parseCsvRows } from '../utils/csv.js'
-import { fetchSheetCsv, sheetCsvUrl } from '../utils/sheet.js'
+import { useSheetData } from '../utils/useSheetData.js'
 import './TesterActivity.css'
 
 const columnAliases = {
@@ -51,34 +51,8 @@ function statusClassName(status) {
 }
 
 function TesterActivity() {
-  const [rows, setRows] = useState([])
-  const [sheetState, setSheetState] = useState(sheetCsvUrl ? 'Loading sheet...' : 'No sheet connected yet')
-
-  useEffect(() => {
-    if (!sheetCsvUrl) {
-      return undefined
-    }
-
-    const controller = new AbortController()
-
-    async function fetchTesterActivity() {
-      try {
-        const csvText = await fetchSheetCsv(controller.signal)
-        setRows(mapSheetRows(csvText))
-        setSheetState('Google Sheet connected')
-      } catch (error) {
-        if (error.name !== 'AbortError') {
-          setRows([])
-          setSheetState('Unable to load Google Sheet')
-        }
-      }
-    }
-
-    fetchTesterActivity()
-
-    return () => controller.abort()
-  }, [])
-
+  const { csvText, sheetState } = useSheetData()
+  const rows = useMemo(() => mapSheetRows(csvText), [csvText])
   const visibleRows = useMemo(() => rows.slice(0, 8), [rows])
 
   return (

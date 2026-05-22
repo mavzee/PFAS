@@ -18,3 +18,5 @@ Required useful columns (either layout works):
 - `Alert`, `Type`: drives Alerts and Reminders.
 
 After importing to Google Sheets, publish the sheet as CSV and paste the CSV URL into `.env`.
+
+The dashboard polls the published CSV every 30 seconds (override with `VITE_GOOGLE_SHEET_POLL_MS`) and keeps the last snapshot in browser storage so the UI can show cached data instantly while refreshing.

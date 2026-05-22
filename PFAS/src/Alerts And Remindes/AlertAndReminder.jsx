@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { findColumnIndex, parseCsvRows } from '../utils/csv.js'
-import { fetchSheetCsv, sheetCsvUrl } from '../utils/sheet.js'
+import { useSheetData } from '../utils/useSheetData.js'
 import './AlertAndReminder.css'
 
 const columnAliases = {
@@ -52,34 +52,8 @@ function mapAlerts(csvText) {
 }
 
 function AlertAndReminder() {
-  const [alerts, setAlerts] = useState([])
-  const [sheetState, setSheetState] = useState(sheetCsvUrl ? 'Loading sheet...' : 'No sheet connected yet')
-
-  useEffect(() => {
-    if (!sheetCsvUrl) {
-      return undefined
-    }
-
-    const controller = new AbortController()
-
-    async function fetchAlerts() {
-      try {
-        const csvText = await fetchSheetCsv(controller.signal)
-        setAlerts(mapAlerts(csvText))
-        setSheetState('Google Sheet connected')
-      } catch (error) {
-        if (error.name !== 'AbortError') {
-          setAlerts([])
-          setSheetState('Unable to load Google Sheet')
-        }
-      }
-    }
-
-    fetchAlerts()
-
-    return () => controller.abort()
-  }, [])
-
+  const { csvText, sheetState } = useSheetData()
+  const alerts = useMemo(() => mapAlerts(csvText), [csvText])
   const visibleAlerts = useMemo(() => alerts.slice(0, 5), [alerts])
 
   return (

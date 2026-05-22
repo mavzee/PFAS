@@ -1,12 +1,18 @@
 export const sheetCsvUrl = import.meta.env.VITE_GOOGLE_SHEET_CSV_URL
 
-export async function fetchSheetCsv(signal) {
-  const response = await fetch(sheetCsvUrl, { signal })
+function sheetRequestUrl() {
+  if (!sheetCsvUrl) {
+    return ''
+  }
 
-  console.log('[TestKitSummary] fetch response', {
-    ok: response.ok,
-    status: response.status,
-    url: sheetCsvUrl,
+  const separator = sheetCsvUrl.includes('?') ? '&' : '?'
+  return `${sheetCsvUrl}${separator}_=${Date.now()}`
+}
+
+export async function fetchSheetCsv(signal) {
+  const response = await fetch(sheetRequestUrl(), {
+    signal,
+    cache: 'no-store',
   })
 
   if (!response.ok) {

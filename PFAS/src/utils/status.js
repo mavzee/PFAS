@@ -148,17 +148,9 @@ export function normalizeStatus(value) {
 export function countStatusesFromCsv(csvText) {
   const rows = parseCsvRows(csvText)
   const [headers = [], ...records] = rows
-
-  console.log('[TestKitSummary] CSV parsed', {
-    rowCount: records.length,
-    headers,
-  })
-
   const columnCounts = countStatusesFromColumns(records, headers)
 
   if (columnCounts) {
-    console.log('[TestKitSummary] Column checkbox counts', columnCounts)
-    console.log('[TestKitSummary] Retainer TRUE count', columnCounts.Retainer ?? 0)
     return columnCounts
   }
 
