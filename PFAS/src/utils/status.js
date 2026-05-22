@@ -117,22 +117,24 @@ export function countStatusesFromColumns(records, headers) {
     return null
   }
 
-  return records.reduce((counts, row) => {
+  const counts = Object.fromEntries(STATUS_ORDER.map((status) => [status, 0]))
+
+  for (const row of records) {
     for (const [status, index] of Object.entries(columnIndices)) {
       if (isCheckedValue(row[index])) {
-        counts[status] = (counts[status] || 0) + 1
+        counts[status] += 1
       }
     }
+  }
 
-    return counts
-  }, {})
+  return counts
 }
 
 export function normalizeStatus(value) {
   const status = value.toLowerCase().replace(/\s+/g, ' ').trim()
 
   if (status.includes('retainer')) return 'Retainer'
-  if (status.includes('ordered') || status.includes('order')) return 'Ordered'
+  if (/\bordered\b/.test(status)) return 'Ordered'
   if (status.includes('outbound')) return 'Outbound'
   if (status.includes('pure green') || status.includes('puregreen') || status.includes('tester')) {
     return 'Pure Green Testers'

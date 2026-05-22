@@ -13,13 +13,15 @@ Required useful columns (either layout works):
 **Checkbox columns** (matches your live sheet): one column per stage with headers `Retainer`, `Ordered`, `Eurofins`, `Outbound`, `Pure Green Testers`, `Inbound`, `Invoice`, `Test Results`. Checked boxes export as `TRUE` in CSV; Test Kit Summary counts each `TRUE` per column.
 
 **Single status column** (template CSV): `Status` text value per row drives Test Kit Summary and Status Breakdown.
-- `Tester`, `Current Location`, `Last Activity`: drives Tester Activity.
+- **Tester Activity tab** (separate sheet): columns `Tester`, `Status`, `Current Location`, `Last Activity` → Tester Activity (Pure Green) widget.
+  - **With API key:** set `VITE_GOOGLE_SHEET_TESTER_TAB=Tester Activity` (default).
+  - **Without API key:** File → Share → Publish to web → choose **Tester Activity** (not the main tab) → CSV → paste that link in `VITE_GOOGLE_SHEET_TESTER_CSV_URL`. The main published URL only includes the first tab.
 - `Activity`, `Time`: drives Recent Activity.
 - `Alert`, `Type`: drives Alerts and Reminders.
 
 After importing to Google Sheets, publish the sheet as CSV and paste the CSV URL into `.env`.
 
-The dashboard polls every second by default (`VITE_GOOGLE_SHEET_POLL_MS`, default `1000`).
+The dashboard polls every second with an API key, or every 5 seconds for published CSV only (`VITE_GOOGLE_SHEET_POLL_MS` overrides this).
 
 **Fastest (recommended):** set `VITE_GOOGLE_SHEET_ID` and `VITE_GOOGLE_SHEETS_API_KEY` so the app reads the sheet via the Google Sheets API (live data, no publish delay). Enable the Sheets API in Google Cloud Console, create an API key, and share the spreadsheet as “Anyone with the link can view”.
 

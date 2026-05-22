@@ -3,18 +3,17 @@ export const sheetId = import.meta.env.VITE_GOOGLE_SHEET_ID
 export const sheetsApiKey = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY
 export const sheetRange = import.meta.env.VITE_GOOGLE_SHEET_RANGE
 export const sheetGid = import.meta.env.VITE_GOOGLE_SHEET_GID || '0'
+export const testerTabName = import.meta.env.VITE_GOOGLE_SHEET_TESTER_TAB || 'Tester Activity'
+export const testerSheetGid = import.meta.env.VITE_GOOGLE_SHEET_TESTER_GID || ''
+export const testerSheetCsvUrl = import.meta.env.VITE_GOOGLE_SHEET_TESTER_CSV_URL || ''
 
-let resolvedSheetTitle = null
+let resolvedMainSheetTitle = null
 
 export function hasSheetConnection() {
-  return Boolean((sheetsApiKey && sheetId) || sheetCsvUrl)
+  return Boolean((sheetsApiKey && sheetId) || sheetCsvUrl || testerSheetCsvUrl)
 }
 
 export function getSheetSourceLabel() {
-  if (sheetsApiKey && sheetId) {
-    return 'live'
-  }
-
   return 'live'
 }
 
@@ -44,22 +43,27 @@ export function valuesToCsvText(values = []) {
   return values.map((row) => row.map(escapeCsvCell).join(',')).join('\n')
 }
 
-function publishedCsvUrl() {
+function publishedCsvUrl(gid = sheetGid) {
   if (!sheetCsvUrl) {
     return ''
   }
 
-  const separator = sheetCsvUrl.includes('?') ? '&' : '?'
-  return `${sheetCsvUrl}${separator}_=${Date.now()}`
+  const url = new URL(sheetCsvUrl)
+  url.searchParams.set('gid', gid)
+  url.searchParams.set('single', 'true')
+  url.searchParams.set('output', 'csv')
+  url.searchParams.set('_', String(Date.now()))
+
+  return url.toString()
 }
 
-async function resolveSheetRange(signal) {
+async function resolveMainSheetRange(signal) {
   if (sheetRange) {
     return sheetRange
   }
 
-  if (resolvedSheetTitle) {
-    return `'${resolvedSheetTitle}'!A:Z`
+  if (resolvedMainSheetTitle) {
+    return `'${resolvedMainSheetTitle}'!A:Z`
   }
 
   const response = await fetch(
@@ -72,18 +76,22 @@ async function resolveSheetRange(signal) {
   }
 
   const data = await response.json()
-  resolvedSheetTitle = data.sheets?.[0]?.properties?.title || 'Sheet1'
+  resolvedMainSheetTitle = data.sheets?.[0]?.properties?.title || 'Sheet1'
 
-  return `'${resolvedSheetTitle}'!A:Z`
+  return `'${resolvedMainSheetTitle}'!A:Z`
 }
 
-async function fetchViaSheetsApi(signal) {
-  const range = await resolveSheetRange(signal)
+function testerSheetRange() {
+  return `'${testerTabName.replace(/'/g, "''")}'!A:Z`
+}
+
+async function fetchValuesRange(range, signal) {
   const url = new URL(
     `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}`,
   )
   url.searchParams.set('key', sheetsApiKey)
   url.searchParams.set('majorDimension', 'ROWS')
+  url.searchParams.set('valueRenderOption', 'UNFORMATTED_VALUE')
 
   const response = await fetch(url, { signal, cache: 'no-store' })
 
@@ -95,14 +103,71 @@ async function fetchViaSheetsApi(signal) {
   return valuesToCsvText(data.values || [])
 }
 
-async function fetchViaPublishedCsv(signal) {
-  const response = await fetch(publishedCsvUrl(), { signal, cache: 'no-store' })
+async function fetchViaSheetsApi(signal) {
+  const mainRange = await resolveMainSheetRange(signal)
+  const [main, tester] = await Promise.all([
+    fetchValuesRange(mainRange, signal),
+    fetchValuesRange(testerSheetRange(), signal).catch(() => ''),
+  ])
+
+  return { main, tester }
+}
+
+function withCacheBust(url) {
+  const nextUrl = new URL(url)
+  nextUrl.searchParams.set('_', String(Date.now()))
+  return nextUrl.toString()
+}
+
+async function readPublishedCsvText(url, signal) {
+  const response = await fetch(withCacheBust(url), { signal, cache: 'no-store' })
 
   if (!response.ok) {
     throw new Error(`Published CSV request failed: ${response.status}`)
   }
 
-  return response.text()
+  const text = await response.text()
+  const trimmed = text.trimStart()
+
+  if (trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html')) {
+    throw new Error('Published CSV is not available')
+  }
+
+  return text
+}
+
+async function fetchPublishedCsv(gid, signal) {
+  return readPublishedCsvText(publishedCsvUrl(gid), signal)
+}
+
+async function fetchTesterPublishedCsv(signal) {
+  if (testerSheetCsvUrl) {
+    return readPublishedCsvText(testerSheetCsvUrl, signal)
+  }
+
+  if (testerSheetGid && sheetCsvUrl) {
+    return fetchPublishedCsv(testerSheetGid, signal)
+  }
+
+  return ''
+}
+
+async function fetchViaPublishedCsv(signal) {
+  const fetches = []
+
+  if (sheetCsvUrl) {
+    fetches.push(
+      fetchPublishedCsv(sheetGid, signal).catch(() => ''),
+    )
+  } else {
+    fetches.push(Promise.resolve(''))
+  }
+
+  fetches.push(fetchTesterPublishedCsv(signal).catch(() => ''))
+
+  const [main, tester] = await Promise.all(fetches)
+
+  return { main, tester }
 }
 
 export async function fetchSheetData(signal) {
@@ -125,5 +190,6 @@ export async function fetchSheetData(signal) {
 
 /** @deprecated Use fetchSheetData */
 export async function fetchSheetCsv(signal) {
-  return fetchSheetData(signal)
+  const data = await fetchSheetData(signal)
+  return typeof data === 'string' ? data : data.main
 }
