@@ -19,4 +19,4 @@ Required useful columns (either layout works):
 
 After importing to Google Sheets, publish the sheet as CSV and paste the CSV URL into `.env`.
 
-The dashboard polls the published CSV every 30 seconds (override with `VITE_GOOGLE_SHEET_POLL_MS`) and keeps the last snapshot in browser storage so the UI can show cached data instantly while refreshing.
+The dashboard polls the published CSV every 5 seconds by default (override with `VITE_GOOGLE_SHEET_POLL_MS`). Each request bypasses browser cache so changes show as soon as Google’s published CSV updates.

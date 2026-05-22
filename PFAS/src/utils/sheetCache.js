@@ -2,15 +2,13 @@ import { parseCsvRows } from './csv.js'
 import { fetchSheetCsv, sheetCsvUrl } from './sheet.js'
 import { countStatusesFromCsv } from './status.js'
 
-const STORAGE_KEY = 'pfas-sheet-csv-cache'
-const DEFAULT_POLL_MS = 30_000
+const DEFAULT_POLL_MS = 5_000
 
-let cache = {
+let state = {
   csvText: '',
   counts: {},
   rows: [],
   headers: [],
-  hash: '',
   lastUpdated: null,
   status: 'idle',
   error: null,
@@ -22,80 +20,29 @@ let pollTimer = null
 let syncStarted = false
 let inflightFetch = null
 
-function hashCsv(text) {
-  let hash = 0
-
-  for (let index = 0; index < text.length; index += 1) {
-    hash = (hash << 5) - hash + text.charCodeAt(index)
-    hash |= 0
-  }
-
-  return String(hash)
-}
-
-function applyCsv(csvText, { fromCache = false, updatedAt = null } = {}) {
+function applyCsv(csvText) {
   const parsed = parseCsvRows(csvText)
   const [headers = [], ...rows] = parsed
 
-  cache.csvText = csvText
-  cache.hash = hashCsv(csvText)
-  cache.headers = headers
-  cache.rows = rows
-  cache.counts = countStatusesFromCsv(csvText)
-  cache.lastUpdated = updatedAt ?? new Date()
-  cache.status = fromCache ? 'cached' : 'connected'
-}
-
-function persistCache() {
-  try {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        csvText: cache.csvText,
-        hash: cache.hash,
-        updatedAt: cache.lastUpdated?.getTime?.() ?? Date.now(),
-      }),
-    )
-  } catch {
-    // Ignore quota or private-mode errors.
-  }
-}
-
-function loadPersistedCache() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) {
-      return false
-    }
-
-    const saved = JSON.parse(raw)
-    if (!saved?.csvText) {
-      return false
-    }
-
-    applyCsv(saved.csvText, {
-      fromCache: true,
-      updatedAt: saved.updatedAt ? new Date(saved.updatedAt) : null,
-    })
-    cache.hash = saved.hash || cache.hash
-
-    return true
-  } catch {
-    return false
-  }
+  state.csvText = csvText
+  state.headers = headers
+  state.rows = rows
+  state.counts = countStatusesFromCsv(csvText)
+  state.lastUpdated = new Date()
+  state.status = 'connected'
 }
 
 function buildSnapshot() {
   return {
-    csvText: cache.csvText,
-    counts: cache.counts,
-    rows: cache.rows,
-    headers: cache.headers,
-    lastUpdated: cache.lastUpdated,
-    status: cache.status,
-    error: cache.error,
-    isRefreshing: cache.isRefreshing,
-    hasData: Boolean(cache.csvText),
+    csvText: state.csvText,
+    counts: state.counts,
+    rows: state.rows,
+    headers: state.headers,
+    lastUpdated: state.lastUpdated,
+    status: state.status,
+    error: state.error,
+    isRefreshing: state.isRefreshing,
+    hasData: Boolean(state.csvText),
   }
 }
 
@@ -119,7 +66,7 @@ export function subscribeSheet(listener) {
   }
 }
 
-export async function refreshSheet({ silent = false } = {}) {
+export async function refreshSheet() {
   if (!sheetCsvUrl) {
     return
   }
@@ -128,34 +75,24 @@ export async function refreshSheet({ silent = false } = {}) {
     return inflightFetch
   }
 
-  if (!silent && !cache.csvText) {
-    cache.status = 'loading'
-    notifySubscribers()
-  } else if (cache.csvText) {
-    cache.isRefreshing = true
-    notifySubscribers()
+  state.isRefreshing = Boolean(state.csvText)
+  if (!state.csvText) {
+    state.status = 'loading'
   }
+  notifySubscribers()
 
   inflightFetch = (async () => {
     try {
       const csvText = await fetchSheetCsv()
-      const nextHash = hashCsv(csvText)
-      const changed = nextHash !== cache.hash || !cache.csvText
-
-      if (changed) {
-        applyCsv(csvText)
-        persistCache()
-      } else {
-        cache.status = 'connected'
-        cache.lastUpdated = new Date()
-      }
-
-      cache.error = null
+      applyCsv(csvText)
+      state.error = null
     } catch (error) {
-      cache.error = error
-      cache.status = cache.csvText ? 'cached' : 'error'
+      state.error = error
+      if (!state.csvText) {
+        state.status = 'error'
+      }
     } finally {
-      cache.isRefreshing = false
+      state.isRefreshing = false
       inflightFetch = null
       notifySubscribers()
     }
@@ -170,22 +107,21 @@ export function startSheetSync() {
   }
 
   syncStarted = true
-  const hadPersistedCache = loadPersistedCache()
 
-  if (hadPersistedCache) {
-    notifySubscribers()
+  try {
+    localStorage.removeItem('pfas-sheet-csv-cache')
+  } catch {
+    // Ignore.
   }
 
-  refreshSheet({ silent: hadPersistedCache })
+  refreshSheet()
 
   const pollMs = Number.parseInt(import.meta.env.VITE_GOOGLE_SHEET_POLL_MS, 10) || DEFAULT_POLL_MS
-  pollTimer = window.setInterval(() => {
-    refreshSheet({ silent: true })
-  }, pollMs)
+  pollTimer = window.setInterval(refreshSheet, pollMs)
 
   function handleVisibilityChange() {
     if (document.visibilityState === 'visible') {
-      refreshSheet({ silent: true })
+      refreshSheet()
     }
   }
 
@@ -220,12 +156,8 @@ export function formatSheetStatus(snapshot) {
     return updatedLabel ? `Syncing... · ${updatedLabel}` : 'Syncing...'
   }
 
-  if (snapshot.status === 'cached') {
-    return updatedLabel ? `Cached · ${updatedLabel}` : 'Showing cached data'
-  }
-
   if (snapshot.status === 'error') {
-    return updatedLabel ? `Offline · ${updatedLabel}` : 'Unable to refresh · showing cached data'
+    return updatedLabel ? `Refresh failed · ${updatedLabel}` : 'Unable to refresh Google Sheet'
   }
 
   return updatedLabel ? `Live · ${updatedLabel}` : 'Google Sheet connected'
