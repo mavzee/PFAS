@@ -9,7 +9,7 @@ import {
 
 export const ACTIVITY_FEED_LIMIT = 50
 
-const labelAliases = [
+export const labelAliases = [
   'company name',
   'company',
   'utility',

@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 import { findColumnIndex, parseCsvRows } from '../utils/csv.js'
+import { buildStageReminders, MAX_VISIBLE_ALERTS } from '../utils/stageReminders.js'
+import { countUncheckedFromCsv } from '../utils/status.js'
 import { useSheetData } from '../utils/useSheetData.js'
 import './AlertAndReminder.css'
 
@@ -51,10 +53,19 @@ function mapAlerts(csvText) {
     .filter((alert) => alert.message)
 }
 
+function mergeAlerts(csvText) {
+  const manual = mapAlerts(csvText)
+  const unchecked = countUncheckedFromCsv(csvText)
+  const auto = buildStageReminders(unchecked ?? {})
+  const seen = new Set(manual.map((alert) => alert.message))
+  const dedupedAuto = auto.filter((alert) => !seen.has(alert.message))
+
+  return [...manual, ...dedupedAuto].slice(0, MAX_VISIBLE_ALERTS)
+}
+
 function AlertAndReminder() {
   const { csvText, sheetState } = useSheetData()
-  const alerts = useMemo(() => mapAlerts(csvText), [csvText])
-  const visibleAlerts = useMemo(() => alerts.slice(0, 5), [alerts])
+  const visibleAlerts = useMemo(() => mergeAlerts(csvText), [csvText])
 
   return (
     <section className="alert-reminder" aria-labelledby="alert-reminder-title">

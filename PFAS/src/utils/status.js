@@ -84,6 +84,7 @@ const COLUMN_HEADER_ALIASES = {
   'pure green tester': 'Pure Green Testers',
   inbound: 'Inbound',
   invoice: 'Invoice',
+  invoices: 'Invoice',
   'test results': 'Test Results',
 }
 
@@ -167,6 +168,48 @@ export function countStatusesFromColumns(records, headers) {
   }
 
   return counts
+}
+
+export function countUncheckedFromColumns(records, headers) {
+  const normalizedHeaders = headers.map((header) => header.toLowerCase().trim())
+  const columnIndices = {}
+
+  normalizedHeaders.forEach((header, index) => {
+    const status = mapHeaderToStatus(header)
+
+    if (status) {
+      columnIndices[status] = index
+    }
+  })
+
+  if (!Object.keys(columnIndices).length) {
+    return null
+  }
+
+  const counts = Object.fromEntries(STATUS_ORDER.map((status) => [status, 0]))
+
+  for (const row of records) {
+    for (const [status, index] of Object.entries(columnIndices)) {
+      const cell = row[index]
+
+      if (status === 'Eurofins') {
+        if (!isEurofinsActive(cell)) {
+          counts[status] += 1
+        }
+      } else if (!isCheckedValue(cell)) {
+        counts[status] += 1
+      }
+    }
+  }
+
+  return counts
+}
+
+export function countUncheckedFromCsv(csvText) {
+  const rows = parseCsvRows(csvText)
+  const [headers = [], ...records] = rows
+
+  return countUncheckedFromColumns(records, headers)
 }
 
 export function normalizeStatus(value) {

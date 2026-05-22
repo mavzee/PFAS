@@ -17,7 +17,9 @@ Required useful columns (either layout works):
   - **With API key:** set `VITE_GOOGLE_SHEET_TESTER_TAB=Tester Activity` (default).
   - **Without API key:** File → Share → Publish to web → choose **Tester Activity** (not the main tab) → CSV → paste that link in `VITE_GOOGLE_SHEET_TESTER_CSV_URL`. The main published URL only includes the first tab.
 - **Recent Activity** (main tab): auto-detects checkbox and status changes when you have **`Company Name`** (or `Record ID`) plus stage columns (`Retainer`, `Ordered`, …). Example: checking Retainer for Blanchester Water Supply shows `Blanchester Water Supply checked Retainer` with a timestamp. Unchecking shows `unchecked Retainer`. The first dashboard load only sets a baseline (no backfill of existing checks). Optional **`Activity`** and **`Time`** columns still add manual log lines; both auto and manual items appear together, newest first.
-- `Alert`, `Type`: drives Alerts and Reminders.
+- `Alert`, `Type`: manual Alerts and Reminders (optional text per row).
+- **Auto reminders:** when the main tab has checkbox stage columns (`Retainer`, `Ordered`, `Outbound`, `Inbound`, `Invoice`, …), the Alerts & Reminders widget also lists unchecked counts per stage (e.g. `5 companies with no Outbound`). Eurofins is excluded (empty is normal). Manual `Alert` rows appear first; auto reminders fill remaining slots (up to 8 total).
+- **Live Map** (main tab): plots a pin for each unique **`Company Name`** (or alias: `Company`, `Utility`, `PWS`, etc.) by geocoding the name via [OpenStreetMap Nominatim](https://nominatim.openstreetmap.org/). Resolved coordinates are saved to **Firestore** (`companyLocationCaches/{sheetId}`, shared by logged-in users) and cached locally. Only new or changed company names are geocoded after the first save. The first load may take about one second per unique company. Ambiguous names (e.g. `Admin`) may pin incorrectly — use recognizable place or utility names. Optional `.env`: `VITE_GEOCODE_COUNTRY=us` to bias searches toward a country code. Deploy updated Firestore rules: `npm run deploy:rules`.
 
 After importing to Google Sheets, publish the sheet as CSV and paste the CSV URL into `.env`.
 
@@ -40,6 +42,9 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /recentActivityFeeds/{sheetId} {
+      allow read, write: if request.auth != null;
+    }
+    match /companyLocationCaches/{sheetId} {
       allow read, write: if request.auth != null;
     }
     match /{document=**} {

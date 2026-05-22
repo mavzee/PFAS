@@ -17,6 +17,10 @@ function markFirestoreError(error) {
   }
 }
 
+export function markFirestorePermissionsDenied(error) {
+  markFirestoreError(error)
+}
+
 function hashString(text) {
   let hash = 0
 

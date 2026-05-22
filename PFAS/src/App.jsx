@@ -3,6 +3,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from './firebase.js'
 import Dashboard from './Dashboard.jsx'
 import Login from './Login/Login.jsx'
+import { resetCompanyLocationCacheHydration } from './utils/companyLocationsStore.js'
 import './Login/Login.css'
 
 function App() {
@@ -11,6 +12,10 @@ function App() {
 
   useEffect(() => {
     return onAuthStateChanged(auth, (firebaseUser) => {
+      if (!firebaseUser) {
+        resetCompanyLocationCacheHydration()
+      }
+
       setUser(firebaseUser)
       setAuthReady(true)
     })
