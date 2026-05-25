@@ -122,6 +122,28 @@
   min-width: 180px;
 }
 
+.tracker-search-submit {
+  border: 1px solid rgba(78, 158, 219, 0.75);
+  border-radius: 4px;
+  background: rgba(78, 158, 219, 0.28);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.35px;
+  padding: 8px 10px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tracker-search-submit:hover:not(:disabled) {
+  background: rgba(78, 158, 219, 0.4);
+}
+
+.tracker-search-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .tracker-search-field input {
   width: 100%;
   box-sizing: border-box;

@@ -1,5 +1,46 @@
-import { formatDateLabel, formatTimeLabel } from '../utils/fedexTrackClient.js'
 import './TravelHistory.css'
+
+function formatDateLabel(rawDate) {
+  if (!rawDate?.trim()) {
+    return ''
+  }
+
+  const parsed = Date.parse(rawDate)
+
+  if (Number.isNaN(parsed)) {
+    return rawDate
+  }
+
+  return new Date(parsed).toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'numeric',
+    day: 'numeric',
+    year: '2-digit',
+  })
+}
+
+function formatTimeLabel(rawTime) {
+  if (!rawTime?.trim()) {
+    return ''
+  }
+
+  if (/am|pm/i.test(rawTime)) {
+    return rawTime
+  }
+
+  const match = rawTime.match(/^(\d{1,2}):(\d{2})/)
+
+  if (!match) {
+    return rawTime
+  }
+
+  const hours = Number.parseInt(match[1], 10)
+  const minutes = match[2]
+  const period = hours >= 12 ? 'PM' : 'AM'
+  const hour12 = hours % 12 || 12
+
+  return `${hour12}:${minutes} ${period}`
+}
 
 function groupEventsByDate(events) {
   const groups = []
@@ -19,45 +60,14 @@ function groupEventsByDate(events) {
   return groups
 }
 
-function TravelHistory({
-  trackingNumber,
-  status,
-  events,
-  error,
-  loading,
-  trackPageUrl,
-  showManualPasteHint = false,
-}) {
-  if (loading) {
-    return (
-      <p className="travel-history-status">
-        Fetching travel history from FedEx… this may take up to a minute.
-      </p>
-    )
-  }
-
-  if (error && !events.length) {
-    return (
-      <div className="travel-history-status-wrap">
-        <p className="travel-history-status travel-history-error">{error}</p>
-        {trackPageUrl ? (
-          <a className="travel-history-fallback-link" href={trackPageUrl} target="_blank" rel="noopener noreferrer">
-            Open on FedEx.com
-          </a>
-        ) : null}
-      </div>
-    )
-  }
-
-  if (!events.length && showManualPasteHint) {
-    return null
-  }
-
+function TravelHistory({ trackingNumber, status = '', events = [] }) {
   if (!events.length) {
     return (
-      <p className="travel-history-status travel-history-pending">
-        Travel history will appear here.
-      </p>
+      <div className="travel-history-status-wrap">
+        <p className="travel-history-status travel-history-pending">
+          Travel history will appear here.
+        </p>
+      </div>
     )
   }
 

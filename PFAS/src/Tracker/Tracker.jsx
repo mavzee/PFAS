@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import LiveMap from '../Live Map/LiveMap.jsx'
+import TravelHistory from './TravelHistory.jsx'
 import './Tracker.css'
 
 const TABS = [
@@ -7,31 +8,80 @@ const TABS = [
   { id: 'map', label: 'Map' },
 ]
 
-function TrackerSearchPanel() {
+function normalizeTrackingNumber(value) {
+  return String(value ?? '').replace(/\s+/g, '').trim()
+}
+
+function TrackerSearchPanel({ trackingQuery, onQueryChange, onSubmit }) {
+  return (
+    <form className="tracker-search" onSubmit={onSubmit}>
+      <label className="tracker-search-label" htmlFor="tracker-search-input">
+        Tracking ID
+      </label>
+      <div className="tracker-search-field">
+        <input
+          id="tracker-search-input"
+          type="search"
+          placeholder="Tracking ID"
+          autoComplete="off"
+          spellCheck={false}
+          value={trackingQuery}
+          onChange={(event) => onQueryChange(event.target.value)}
+        />
+      </div>
+      <button className="tracker-search-submit" type="submit">
+        Search
+      </button>
+    </form>
+  )
+}
+
+function TrackerPanel() {
+  const [trackingQuery, setTrackingQuery] = useState('')
+  const [trackingNumber, setTrackingNumber] = useState('')
+  const [hasSearched, setHasSearched] = useState(false)
+
+  function runLookup(rawTrackingNumber) {
+    const normalized = normalizeTrackingNumber(rawTrackingNumber)
+
+    if (!normalized) {
+      setHasSearched(false)
+      setTrackingNumber('')
+      return
+    }
+
+    setHasSearched(true)
+    setTrackingNumber(normalized)
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault()
+    const normalized = normalizeTrackingNumber(trackingQuery)
+    setTrackingQuery(normalized)
+    runLookup(normalized)
+  }
+
+  const shouldShowPrompt = !hasSearched && !trackingQuery.trim()
+
   return (
     <>
-      <div className="tracker-search">
-        <label className="tracker-search-label" htmlFor="tracker-search-input">
-          Tracking ID
-        </label>
-        <div className="tracker-search-field">
-          <input
-            id="tracker-search-input"
-            type="search"
-            placeholder="Tracking ID"
-            autoComplete="off"
-            spellCheck={false}
-            disabled
-          />
-        </div>
-      </div>
-      <p className="tracker-empty">Enter a tracking ID to look up a shipment.</p>
+      <TrackerSearchPanel
+        trackingQuery={trackingQuery}
+        onQueryChange={setTrackingQuery}
+        onSubmit={handleSubmit}
+      />
+
+      {shouldShowPrompt ? (
+        <p className="tracker-empty">Enter a tracking ID to look up a shipment.</p>
+      ) : (
+        <TravelHistory trackingNumber={trackingNumber} status="" events={[]} />
+      )}
     </>
   )
 }
 
 function FedExTracker() {
-  const [activeTab, setActiveTab] = useState('map')
+  const [activeTab, setActiveTab] = useState('tracker')
 
   return (
     <section className="tracker" aria-labelledby="tracker-title">
@@ -63,7 +113,7 @@ function FedExTracker() {
           hidden={activeTab !== 'tracker'}
           className="tracker-panel"
         >
-          <TrackerSearchPanel />
+          <TrackerPanel />
         </div>
 
         <div
